@@ -99,13 +99,38 @@
     });
 
     daftar.forEach(function (p, indeks) {
+      var metode = p.metode === 'antar' ? 'antar' : 'jemput';
+      var subtotal = Number(p.total) || 0;
+      var ongkir = Number(p.ongkir) || 0;
+      var alamat = p.alamat || '';
+      var jarak = Number(p.jarak_km) || 0;
+      var catatan = p.catatan || '';
+
+      function garis(teks, meredup) {
+        var span = document.createElement('span');
+        span.style.display = 'block';
+        span.textContent = teks;
+        if (meredup) {
+          span.className = 'teks-redup';
+          span.style.fontSize = '0.85rem';
+        }
+        return span;
+      }
+
       var tr = document.createElement('tr');
       tr.appendChild(td(indeks + 1));
       tr.appendChild(td(BFB.tanggalManis(p.waktu)));
       tr.appendChild(td(p.nama, 'bungkus'));
       tr.appendChild(td(p.produk_nama, 'bungkus'));
       tr.appendChild(td(p.jumlah));
-      tr.appendChild(td(BFB.rupiah(p.total)));
+
+      // Total pembayaran = total produk + ongkos kirim (kolom total tetap subtotal produk).
+      var cellTotal = document.createElement('td');
+      cellTotal.appendChild(document.createTextNode(BFB.rupiah(subtotal + ongkir)));
+      cellTotal.appendChild(
+        garis('Produk ' + BFB.rupiah(subtotal) + ' · Ongkir ' + BFB.rupiah(ongkir), true)
+      );
+      tr.appendChild(cellTotal);
 
       var cellStatus = document.createElement('td');
       cellStatus.appendChild(selStatus(p));
@@ -117,7 +142,18 @@
       tr.appendChild(cellStatus);
 
       tr.appendChild(td(p.whatsapp));
-      tr.appendChild(td(p.catatan || '-', 'bungkus'));
+
+      var cellKeterangan = document.createElement('td');
+      cellKeterangan.className = 'bungkus';
+      cellKeterangan.appendChild(garis('Metode: ' + (metode === 'antar' ? 'Antar' : 'Jemput'), false));
+      if (metode === 'antar') {
+        cellKeterangan.appendChild(garis('Alamat: ' + (alamat || '-'), true));
+        cellKeterangan.appendChild(garis('Jarak: ' + BfbOngkir.teksJarak(jarak) + ' km', true));
+      }
+      cellKeterangan.appendChild(garis('Ongkir: ' + BFB.rupiah(ongkir), true));
+      if (catatan) cellKeterangan.appendChild(garis('Catatan: ' + catatan, true));
+      tr.appendChild(cellKeterangan);
+
       tbody.appendChild(tr);
     });
   }
@@ -175,6 +211,8 @@
       document.getElementById('statPesanan').textContent = data.totalPesanan;
       document.getElementById('statItem').textContent = data.totalItem;
       document.getElementById('statNilai').textContent = BFB.rupiah(data.totalNilai);
+      document.getElementById('statNilaiProduk').textContent = BFB.rupiah(data.totalNilai);
+      document.getElementById('statOngkir').textContent = BFB.rupiah(data.totalOngkir || 0);
       document.getElementById('infoPenyimpanan').textContent = data.penyimpanan;
 
       var tbodyStatus = document.getElementById('isiStatus');

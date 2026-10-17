@@ -12,6 +12,7 @@
  *   - Keunggulan dan cara penyimpanan FIX
  *   - Daftar bahan serta tabel kandungan gizi per sajian FIX
  *   - Varian produk beserta harga FIX
+ *   - Metode penerimaan, alamat kantor, batas jarak, dan tarif ongkos kirim FIX
  *   - Nomor WhatsApp dan akun media sosial FIX (SOSMED CONTOH)
  * ============================================================================
  */
@@ -87,6 +88,32 @@ module.exports = {
       keterangan: 'Rasa cokelat klasik dengan kandungan protein 11 gram per sajian.'
     },
   ],
+
+  /**
+   * Konfigurasi metode penerimaan dan ongkos kirim.
+   * Berkas ini adalah satu-satunya sumber data tarif, batas jarak, dan alamat kantor.
+   * Data dikirim ke peramban melalui /api/produk lalu dipakai oleh logika hitung ongkir
+   * yang sama di server maupun tampilan (public/js/ongkir.js).
+   */
+  pengiriman: {
+    // Ganti dengan alamat resmi kantor/pusat produksi sebelum website dipublikasikan.
+    alamatKantor: 'ALAMAT KANTOR (isi dengan alamat resmi)',
+    // Jarak terjauh yang dilayani, dalam kilometer.
+    jarakMaksKm: 100,
+    // Tarif berdasarkan batas jarak menaik (kilometer terjauh pada baris tersebut).
+    tarif: [
+      { sampaiKm: 3, tarif: 6000 },
+      { sampaiKm: 5, tarif: 9000 },
+      { sampaiKm: 10, tarif: 15000 },
+      { sampaiKm: 15, tarif: 22000 },
+      { sampaiKm: 20, tarif: 30000 },
+      { sampaiKm: 30, tarif: 42000 },
+      { sampaiKm: 40, tarif: 55000 }
+    ],
+    // Jarak di atas setelahKm: tarifAwal + tarifPerKm untuk tiap kilometer lebihnya,
+    // dibulatkan ke atas per kilometer. tarifAwal sama dengan tarif baris terakhir tabel.
+    tarifPanjang: { setelahKm: 40, tarifAwal: 55000, tarifPerKm: 1500 }
+  },
 
   kontak: {
     whatsapp: {

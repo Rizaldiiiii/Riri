@@ -31,7 +31,7 @@ router.get('/produk', (req, res) => {
 
 /** POST /api/pesanan — menyimpan pesanan konsumen. */
 router.post('/pesanan', (req, res) => {
-  const hasil = validasiPesanan(req.body, produkData.varian);
+  const hasil = validasiPesanan(req.body, produkData.varian, produkData.pengiriman);
   if (!hasil.ok) {
     return res.status(400).json({ error: hasil.error });
   }
@@ -47,6 +47,11 @@ router.post('/pesanan', (req, res) => {
         produk: rekaman.produk_nama,
         jumlah: rekaman.jumlah,
         total: rekaman.total,
+        metode: rekaman.metode,
+        alamat: rekaman.alamat,
+        jarak_km: rekaman.jarak_km,
+        ongkir: rekaman.ongkir,
+        totalPembayaran: (Number(rekaman.total) || 0) + (Number(rekaman.ongkir) || 0),
         status: rekaman.status
       }
     });

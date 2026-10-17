@@ -25,6 +25,10 @@ CREATE TABLE IF NOT EXISTS pesanan (
   total       INTEGER NOT NULL,
   catatan     TEXT    NOT NULL DEFAULT '',
   persetujuan INTEGER NOT NULL DEFAULT 0,
+  metode      TEXT    NOT NULL DEFAULT 'jemput',
+  alamat      TEXT    NOT NULL DEFAULT '',
+  jarak_km    REAL    NOT NULL DEFAULT 0,
+  ongkir      INTEGER NOT NULL DEFAULT 0,
   status      TEXT    NOT NULL DEFAULT 'baru',
   diperbarui  TEXT
 );
@@ -37,6 +41,14 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 `;
 
+/** Kolom baru fitur metode penerimaan dan ongkos kirim beserta nilai bawaannya. */
+const MIGRASI_PESANAN = [
+  ["metode", "TEXT NOT NULL DEFAULT 'jemput'"],
+  ["alamat", "TEXT NOT NULL DEFAULT ''"],
+  ['jarak_km', 'REAL NOT NULL DEFAULT 0'],
+  ['ongkir', 'INTEGER NOT NULL DEFAULT 0']
+];
+
 class SqliteStore {
   constructor(db, nama, keterangan) {
     this.db = db;
@@ -46,6 +58,33 @@ class SqliteStore {
 
   siap() {
     this.db.exec(SKEMA);
+    this.migrasiPesanan();
+  }
+
+  /**
+   * Menambahkan kolom baru pada tabel pesanan bila belum ada (ALTER TABLE ... ADD COLUMN),
+   * sehingga basis data lama tetap utuh dan pesanan lama tetap valid
+   * dengan nilai bawaan metode "jemput" dan ongkos kirim 0.
+   */
+  migrasiPesanan() {
+    let kolom = [];
+    try {
+      kolom = this.semua("PRAGMA table_info('pesanan')").map((baris) => baris.name);
+    } catch (err) {
+      console.warn('[penyimpanan] Kolom tabel pesanan tidak dapat dibaca:', err.message);
+      return;
+    }
+
+    const punya = new Set(kolom);
+    for (const [nama, jenis] of MIGRASI_PESANAN) {
+      if (punya.has(nama)) continue;
+      try {
+        this.jalankan('ALTER TABLE pesanan ADD COLUMN ' + nama + ' ' + jenis);
+        console.log('[penyimpanan] Kolom baru ditambahkan: pesanan.' + nama);
+      } catch (err) {
+        console.warn('[penyimpanan] Gagal menambah kolom pesanan.' + nama + ':', err.message);
+      }
+    }
   }
 
   semua(sql, params = []) {
@@ -76,8 +115,9 @@ class SqliteStore {
     const waktu = new Date().toISOString();
     const hasil = this.jalankan(
       `INSERT INTO pesanan
-         (waktu, nama, whatsapp, produk_id, produk_nama, harga, jumlah, total, catatan, persetujuan, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'baru')`,
+         (waktu, nama, whatsapp, produk_id, produk_nama, harga, jumlah, total,
+          metode, alamat, jarak_km, ongkir, catatan, persetujuan, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'baru')`,
       [
         waktu,
         isi.nama,
@@ -87,6 +127,10 @@ class SqliteStore {
         isi.harga,
         isi.jumlah,
         isi.total,
+        isi.metode || 'jemput',
+        isi.alamat || '',
+        Number(isi.jarak_km) || 0,
+        Number(isi.ongkir) || 0,
         isi.catatan,
         isi.persetujuan ? 1 : 0
       ]

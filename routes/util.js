@@ -1,8 +1,12 @@
 'use strict';
 
 const crypto = require('crypto');
+const { hitungOngkir } = require('../public/js/ongkir');
 
 /** Utilitas bersama untuk seluruh rute API. */
+
+const JEMPUT = 'jemput';
+const ANTAR = 'antar';
 
 const NAMA_KUKI = 'banafit_sesi';
 const DURASI_SESI_MS = 8 * 60 * 60 * 1000; // 8 jam
@@ -67,9 +71,12 @@ function teks(value, panjangMaks) {
 
 /**
  * Validasi isi formulir pemesanan.
+ * Metode penerimaan, alamat, dan jarak divalidasi di sini, sedangkan ongkos kirim
+ * selalu dihitung ulang di server memakai konfigurasi `pengiriman` dari data/produk.js.
+ * @param {object} konfigPengiriman Isi kunci `pengiriman` dari data/produk.js.
  * @returns {{ok: true, data: object}|{ok: false, error: string}}
  */
-function validasiPesanan(body, daftarVarian) {
+function validasiPesanan(body, daftarVarian, konfigPengiriman) {
   const nama = teks(body && body.nama, 100);
   const whatsapp = teks(body && body.whatsapp, 25).replace(/[^\d+]/g, '');
   const produkId = teks(body && body.produkId, 50);
@@ -91,6 +98,41 @@ function validasiPesanan(body, daftarVarian) {
   const varian = daftarVarian.find((v) => v.id === produkId);
   if (!varian) return { ok: false, error: 'Pilihan produk tidak dikenal.' };
 
+  const metode = teks(body && body.metode, 10).toLowerCase();
+  const konfig = konfigPengiriman || {};
+
+  if (metode !== JEMPUT && metode !== ANTAR) {
+    return {
+      ok: false,
+      error: 'Metode penerimaan harus "jemput" (jemput sendiri di kantor) atau "antar" (antar ke lokasi pembeli).'
+    };
+  }
+
+  let alamat = '';
+  let jarakKm = 0;
+  let ongkir = 0;
+
+  if (metode === ANTAR) {
+    // Dibaca dengan kepala ruang 1000 karakter agar alamat yang terlalu panjang
+    // dapat ditolak dengan pesan jelas, bukan terpotong diam-diam.
+    alamat = teks(body && body.alamat, 1000);
+    if (alamat.length > 300) {
+      return { ok: false, error: 'Alamat lengkap untuk metode antar maksimal 300 karakter.' };
+    }
+    if (alamat.length < 10) {
+      return { ok: false, error: 'Alamat lengkap untuk metode antar minimal 10 karakter.' };
+    }
+
+    // Nilai ongkir dari peramban tidak pernah dipercaya; selalu dihitung ulang di server.
+    const jarak = body && body.jarak !== undefined && body.jarak !== null && body.jarak !== ''
+      ? Number(body.jarak)
+      : Number.NaN;
+    const hitung = hitungOngkir(konfig, jarak);
+    if (!hitung.ok) return { ok: false, error: hitung.error };
+    jarakKm = jarak;
+    ongkir = hitung.ongkir;
+  }
+
   return {
     ok: true,
     data: {
@@ -101,9 +143,27 @@ function validasiPesanan(body, daftarVarian) {
       harga: Number(varian.harga) || 0,
       jumlah,
       total: (Number(varian.harga) || 0) * jumlah,
+      metode,
+      alamat,
+      jarak_km: jarakKm,
+      ongkir,
       catatan,
       persetujuan: 1
     }
+  };
+}
+
+/**
+ * Melengkapi pesanan lama yang belum memiliki data metode penerimaan
+ * dengan nilai bawaan: metode "jemput" dan ongkos kirim 0.
+ */
+function bawaanPesanan(pesanan) {
+  const p = pesanan || {};
+  return {
+    metode: p.metode || JEMPUT,
+    alamat: p.alamat || '',
+    jarak_km: Number(p.jarak_km) || 0,
+    ongkir: Number(p.ongkir) || 0
   };
 }
 
@@ -145,5 +205,6 @@ module.exports = {
   samakanKataSandi,
   validasiPesanan,
   validasiFeedback,
+  bawaanPesanan,
   keCsv
 };

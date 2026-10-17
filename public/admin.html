@@ -91,13 +91,13 @@
               <thead>
                 <tr>
                   <th>No.</th><th>Waktu</th><th>Nama</th><th>Produk</th>
-                  <th>Jumlah</th><th>Total</th><th>Status</th><th>WhatsApp</th><th>Catatan</th>
+                  <th>Jumlah</th><th>Total Bayar</th><th>Status</th><th>WhatsApp</th><th>Keterangan</th>
                 </tr>
               </thead>
               <tbody id="isiPesanan"><tr><td colspan="9">Memuat data...</td></tr></tbody>
             </table>
           </div>
-          <p class="teks-redup spasi-atas">Ubah status pesanan melalui pilihan pada kolom Status. Pilihan status: baru, diproses, dan selesai.</p>
+          <p class="teks-redup spasi-atas">Ubah status pesanan melalui pilihan pada kolom Status. Pilihan status: baru, diproses, dan selesai. Kolom Total Bayar menampilkan total pembayaran (produk ditambah ongkos kirim), sedangkan rincian produk dan ongkos kirim tercantum pada kolom Keterangan.</p>
         </div>
       </section>
 
@@ -133,6 +133,10 @@
       <section class="tab-panel" id="panel-rekap" role="tabpanel" aria-labelledby="tab-rekap" hidden>
         <div class="kartu">
           <div class="judul-bagian"><h2>Rekap Penjualan</h2></div>
+          <div class="kotak-statistik dua-kolom">
+            <div class="statistik"><div class="angka" id="statNilaiProduk">Rp0</div><div class="keterangan">Total nilai produk</div></div>
+            <div class="statistik"><div class="angka" id="statOngkir">Rp0</div><div class="keterangan">Total ongkos kirim</div></div>
+          </div>
           <div class="bungkus-tabel">
             <table class="data">
               <thead><tr><th>Status</th><th>Jumlah Pesanan</th></tr></thead>
@@ -191,6 +195,7 @@
     </div>
   </footer>
 
+  <script src="/js/ongkir.js"></script>
   <script src="/js/main.js"></script>
   <script src="/js/admin.js"></script>
 </body>

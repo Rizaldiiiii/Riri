@@ -15,7 +15,7 @@ function muatBerkas() {
   try {
     const isi = JSON.parse(fs.readFileSync(ARSIP, 'utf8'));
     return {
-      pesanan: Array.isArray(isi.pesanan) ? isi.pesanan : [],
+      pesanan: Array.isArray(isi.pesanan) ? isi.pesanan.map(normalisasiPesanan) : [],
       feedback: Array.isArray(isi.feedback) ? isi.feedback : []
     };
   } catch (err) {
@@ -24,6 +24,23 @@ function muatBerkas() {
     }
     throw err;
   }
+}
+
+/**
+ * Melengkapi pesanan lama yang belum memiliki data metode penerimaan
+ * dengan nilai bawaan: metode "jemput" dan ongkos kirim 0.
+ */
+function normalisasiPesanan(pesanan) {
+  const hasil = Object.assign({}, pesanan);
+  if (!hasil.metode) hasil.metode = 'jemput';
+  if (typeof hasil.alamat !== 'string') hasil.alamat = hasil.alamat ? String(hasil.alamat) : '';
+  if (!Number.isFinite(Number(hasil.jarak_km)) || hasil.jarak_km === undefined || hasil.jarak_km === null) {
+    hasil.jarak_km = 0;
+  }
+  if (hasil.ongkir === undefined || hasil.ongkir === null || !Number.isFinite(Number(hasil.ongkir))) {
+    hasil.ongkir = 0;
+  }
+  return hasil;
 }
 
 class JsonStore {
@@ -60,7 +77,7 @@ class JsonStore {
   }
 
   daftarPesanan() {
-    return this.data.pesanan.slice().sort((a, b) => b.id - a.id);
+    return this.data.pesanan.map(normalisasiPesanan).sort((a, b) => b.id - a.id);
   }
 
   ubahStatusPesanan(id, status) {

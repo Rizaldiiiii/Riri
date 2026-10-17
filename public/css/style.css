@@ -417,6 +417,64 @@ table.data tr.sorotan { background: var(--kuning-3) !important; font-weight: 700
 .bidang input[aria-invalid="true"], .bidang textarea[aria-invalid="true"],
 .bidang select[aria-invalid="true"] { border-color: var(--bahaya); }
 
+[hidden] { display: none !important; }
+
+/* --- Metode penerimaan dan rincian biaya ------------------------------ */
+.label-bidang { font-weight: 700; font-size: 0.94rem; color: var(--cokelat); }
+
+.opsi-metode {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--putih);
+  border: 1.5px solid var(--garis);
+  border-radius: var(--radius-kecil);
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--teks);
+  cursor: pointer;
+}
+
+.opsi-metode input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--cokelat-2);
+}
+
+.opsi-metode:has(input:checked) {
+  border-color: var(--cokelat-3);
+  background: var(--krem-2);
+}
+
+.ringkasan-biaya {
+  background: var(--krem-2);
+  border: 1px solid var(--garis);
+  border-radius: var(--radius-kecil);
+  padding: 14px;
+}
+
+.baris-ringkasan {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+  padding: 3px 0;
+}
+
+.baris-ringkasan.baris-total {
+  border-top: 1.5px dashed var(--garis);
+  margin-top: 6px;
+  padding-top: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cokelat);
+}
+
+.bantuan-galat { color: var(--bahaya); font-weight: 600; }
+
 .persetujuan {
   display: flex;
   gap: 10px;
@@ -471,6 +529,7 @@ table.data tr.sorotan { background: var(--kuning-3) !important; font-weight: 700
 .statistik .keterangan { font-size: 0.85rem; color: var(--teks-redup); }
 
 @media (min-width: 720px) { .kotak-statistik { grid-template-columns: repeat(4, 1fr); } }
+.kotak-statistik.dua-kolom { grid-template-columns: repeat(2, 1fr); }
 
 .status {
   display: inline-block;

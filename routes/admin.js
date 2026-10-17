@@ -10,6 +10,7 @@ const {
   samakanKataSandi,
   buatTokenSesi,
   hapusSesi,
+  bawaanPesanan,
   keCsv
 } = require('./util');
 
@@ -99,11 +100,18 @@ router.get('/pesanan.csv', wajibAdmin, (req, res) => {
       'harga',
       'jumlah',
       'total',
+      'metode',
+      'alamat',
+      'jarak_km',
+      'ongkir',
       'catatan',
       'persetujuan',
       'status'
     ];
-    const isi = keCsv(kolom, daftar);
+    const isi = keCsv(
+      kolom,
+      daftar.map((pesanan) => Object.assign({}, pesanan, bawaanPesanan(pesanan)))
+    );
     const namaBerkas = 'pesanan-banafitbrow-' + new Date().toISOString().slice(0, 10) + '.csv';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="' + namaBerkas + '"');
@@ -192,6 +200,7 @@ router.get('/rekap', wajibAdmin, (req, res) => {
       totalPesanan: daftar.length,
       totalItem: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.jumlah) || 0), 0),
       totalNilai: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.total) || 0), 0),
+      totalOngkir: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.ongkir) || 0), 0),
       perStatus,
       perProduk: Array.from(perProduk.values()),
       penyimpanan: storage.nama + ' — ' + storage.keterangan
