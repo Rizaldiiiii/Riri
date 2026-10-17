@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="Ilustrasi brownies dan pisang">
+  <rect width="320" height="240" rx="24" fill="#fbf4e4"/>
+  <circle cx="258" cy="52" r="40" fill="#ffe9a3"/>
+  <g>
+    <rect x="56" y="96" width="150" height="104" rx="16" fill="#6f4429"/>
+    <rect x="56" y="96" width="150" height="34" rx="16" fill="#8b5e3c"/>
+    <rect x="70" y="140" width="122" height="48" rx="10" fill="#5a3620"/>
+    <circle cx="94" cy="160" r="7" fill="#2e1a10"/>
+    <circle cx="126" cy="172" r="7" fill="#2e1a10"/>
+    <circle cx="158" cy="156" r="7" fill="#2e1a10"/>
+    <rect x="70" y="104" width="122" height="12" rx="6" fill="#a9764e"/>
+  </g>
+  <g>
+    <path d="M214 150c0 30 22 52 52 52 8 0 14-4 14-10s-6-9-13-9c-18 0-33-14-33-35 0-7-4-11-10-11s-10 5-10 13z" fill="#f5c518"/>
+    <path d="M214 150c0 30 22 52 52 52" stroke="#e0ad0d" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <rect x="207" y="132" width="12" height="16" rx="5" fill="#6f4429"/>
+  </g>
+  <g>
+    <circle cx="74" cy="66" r="26" fill="#fff2c9" stroke="#f5c518" stroke-width="5"/>
+    <circle cx="74" cy="66" r="8" fill="#f5c518"/>
+    <circle cx="74" cy="66" r="3" fill="#6f4429"/>
+  </g>
+</svg>

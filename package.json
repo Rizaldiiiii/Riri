@@ -1,0 +1,20 @@
+{
+  "name": "banafitbrow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BanaFitBrow: Kreasi Brownies Tinggi Protein Berbahan Pisang, Oat, dan Whey Protein dengan Smart Packaging Berbasis QR Code dan Digitalisasi Sistem Pemasaran",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "qr": "node scripts/generate-qr.js"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.4"
+  }
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Admin — BanaFitBrow</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <!-- Masuk -->
+    <section class="bagian" id="layarMasuk">
+      <span class="eyebrow">Bagian B · Dashboard Admin</span>
+      <div class="judul-bagian"><h1>Masuk Dashboard Admin</h1></div>
+      <form class="kartu formulir" id="formulirMasuk" style="max-width:460px" novalidate>
+        <div class="bidang">
+          <label for="kataSandi">Kata Sandi</label>
+          <input type="password" id="kataSandi" name="kataSandi" autocomplete="current-password" required>
+          <span class="bantuan">Kata sandi dibaca dari berkas .env (ADMIN_PASSWORD).</span>
+        </div>
+        <div class="hero-aksi">
+          <button class="tombol tombol-utama" type="submit" id="tombolMasuk">Masuk</button>
+        </div>
+        <p class="pesan" id="pesanMasuk" role="status" aria-live="polite"></p>
+      </form>
+      <p class="teks-redup spasi-atas">Halaman ini dilindungi kata sandi sederhana untuk keperluan pengelolaan data pesanan dan feedback.</p>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="bagian sembunyi" id="layarDasbor">
+      <div class="judul-bagian">
+        <h1>Dashboard Admin</h1>
+        <span class="eyebrow" id="infoPenyimpanan">—</span>
+      </div>
+
+      <div class="hero-aksi" style="margin-bottom:18px">
+        <button class="tombol tombol-cokelat tombol-kecil" type="button" id="tombolMuat">Muat Ulang Data</button>
+        <a class="tombol tombol-lingan tombol-kecil" href="/api/admin/pesanan.csv" id="tombolCsv">Ekspor CSV Pesanan</a>
+        <button class="tombol tombol-lingan tombol-kecil" type="button" id="tombolKeluar">Keluar</button>
+      </div>
+
+      <p class="pesan" id="pesanDasbor" role="status" aria-live="polite"></p>
+
+      <div class="kotak-statistik bagian">
+        <div class="statistik"><div class="angka" id="statPesanan">0</div><div class="keterangan">Total pesanan</div></div>
+        <div class="statistik"><div class="angka" id="statItem">0</div><div class="keterangan">Total item dipesan</div></div>
+        <div class="statistik"><div class="angka" id="statNilai">Rp0</div><div class="keterangan">Total nilai pesanan</div></div>
+        <div class="statistik"><div class="angka" id="statRating">—</div><div class="keterangan">Rata-rata rating</div></div>
+      </div>
+
+      <div class="tab-bar" role="tablist" aria-label="Bagian dashboard">
+        <button type="button" role="tab" id="tab-pesanan" aria-controls="panel-pesanan" aria-selected="true">Pesanan</button>
+        <button type="button" role="tab" id="tab-feedback" aria-controls="panel-feedback" aria-selected="false">Feedback</button>
+        <button type="button" role="tab" id="tab-pelanggan" aria-controls="panel-pelanggan" aria-selected="false">Pelanggan</button>
+        <button type="button" role="tab" id="tab-rekap" aria-controls="panel-rekap" aria-selected="false">Rekap Penjualan</button>
+        <button type="button" role="tab" id="tab-qr" aria-controls="panel-qr" aria-selected="false">QR Code</button>
+      </div>
+
+      <!-- Pesanan -->
+      <section class="tab-panel" id="panel-pesanan" role="tabpanel" aria-labelledby="tab-pesanan">
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Daftar Pesanan</h2></div>
+
+          <div class="bidang" style="max-width:280px">
+            <label for="urutanPesanan">Urutan</label>
+            <select id="urutanPesanan">
+              <option value="lama">Terlama di atas (nomor naik)</option>
+              <option value="baru">Terbaru di atas</option>
+            </select>
+          </div>
+
+          <div class="bungkus-tabel">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>No.</th><th>Waktu</th><th>Nama</th><th>Produk</th>
+                  <th>Jumlah</th><th>Total</th><th>Status</th><th>WhatsApp</th><th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody id="isiPesanan"><tr><td colspan="9">Memuat data...</td></tr></tbody>
+            </table>
+          </div>
+          <p class="teks-redup spasi-atas">Ubah status pesanan melalui pilihan pada kolom Status. Pilihan status: baru, diproses, dan selesai.</p>
+        </div>
+      </section>
+
+      <!-- Feedback -->
+      <section class="tab-panel" id="panel-feedback" role="tabpanel" aria-labelledby="tab-feedback" hidden>
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Feedback Konsumen</h2></div>
+          <p>Rata-rata rating: <strong id="ringkasRating">—</strong> dari <strong id="ringkasJumlah">0</strong> feedback.</p>
+          <div class="bungkus-tabel">
+            <table class="data">
+              <thead><tr><th>No.</th><th>Waktu</th><th>Nama</th><th>Rating</th><th>Komentar</th></tr></thead>
+              <tbody id="isiFeedback"><tr><td colspan="5">Memuat data...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pelanggan -->
+      <section class="tab-panel" id="panel-pelanggan" role="tabpanel" aria-labelledby="tab-pelanggan" hidden>
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Data Pelanggan</h2></div>
+          <p class="teks-redup">Data dihimpun dari pesanan yang masuk dan digunakan untuk keperluan pemrosesan pesanan.</p>
+          <div class="bungkus-tabel">
+            <table class="data">
+              <thead><tr><th>Nama</th><th>WhatsApp</th><th>Jumlah Pesanan</th><th>Jumlah Item</th><th>Total Nilai</th><th>Pesanan Terakhir</th></tr></thead>
+              <tbody id="isiPelanggan"><tr><td colspan="6">Memuat data...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rekap -->
+      <section class="tab-panel" id="panel-rekap" role="tabpanel" aria-labelledby="tab-rekap" hidden>
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Rekap Penjualan</h2></div>
+          <div class="bungkus-tabel">
+            <table class="data">
+              <thead><tr><th>Status</th><th>Jumlah Pesanan</th></tr></thead>
+              <tbody id="isiStatus"></tbody>
+            </table>
+          </div>
+          <div class="bungkus-tabel spasi-atas">
+            <table class="data">
+              <thead><tr><th>Produk</th><th>Jumlah Pesanan</th><th>Jumlah Item</th><th>Total Nilai</th></tr></thead>
+              <tbody id="isiPerProduk"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- QR Code -->
+      <section class="tab-panel" id="panel-qr" role="tabpanel" aria-labelledby="tab-qr" hidden>
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Generator QR Code</h2></div>
+          <p class="teks-redup">QR Code berikut mengarah ke alamat website dan dapat dicetak pada kemasan.</p>
+          <p class="teks-redup">Alamat tujuan: <strong id="alamatQr">—</strong></p>
+          <div class="rata-tengah" style="background:#fff;border:1px solid var(--garis);border-radius:16px;padding:18px;display:inline-block">
+            <img id="gambarQr" src="/api/qr.png?size=320" alt="QR Code menuju website BanaFitBrow" width="320" height="320" style="width:320px;height:auto">
+          </div>
+          <div class="hero-aksi spasi-atas">
+            <a class="tombol tombol-utama tombol-kecil" href="/api/qr.png?size=1024" download="banafitbrow-qr.png">Unduh PNG 1024 px</a>
+            <a class="tombol tombol-lingan tombol-kecil" href="/api/qr.png?size=512" target="_blank" rel="noopener">Pratinjau 512 px</a>
+          </div>
+          <p class="teks-redup spasi-atas">Untuk keperluan produksi massal, jalankan perintah <code>npm run qr</code> pada folder proyek. Berkas hasil tersimpan di folder qr/.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p>Dashboard pengelolaan pesanan, feedback, dan rekap penjualan.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/">Beranda</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+        </div>
+      </div>
+      <div>
+        <h4>Keamanan</h4>
+        <p>Kata sandi dibaca dari berkas .env. Jangan bagikan berkas .env kepada pihak lain.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p>&copy; <span data-tahun></span> BanaFitBrow.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

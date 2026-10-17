@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Media Sosial — BanaFitBrow</title>
+  <meta name="description" content="Kanal resmi BanaFitBrow: Instagram, TikTok, WhatsApp, dan kanal pemesanan lainnya.">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <noscript>
+      <p class="pesan pesan-info terlihat">Halaman ini membutuhkan JavaScript untuk menampilkan tautan media sosial.</p>
+    </noscript>
+    <p class="pesan pesan-galat" data-galat role="alert"></p>
+
+    <section class="bagian">
+      <span class="eyebrow">Bagian A · Media Sosial</span>
+      <div class="judul-bagian"><h1>Media Sosial dan Kanal Pemesanan</h1></div>
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <p>Berikut adalah kanal resmi BanaFitBrow. Seluruh tautan berikut menggunakan alamat contoh dan dapat diganti melalui berkas data/produk.js.</p>
+    </section>
+
+    <section class="bagian">
+      <div class="grid" data-render="media"></div>
+    </section>
+
+    <section class="bagian grid grid-2">
+      <div class="kartu">
+        <div class="judul-bagian"><h2>Pemesanan Melalui WhatsApp</h2></div>
+        <p>Untuk pemesanan langsung, gunakan tombol berikut. Anda juga dapat mengisi formulir pemesanan yang tersedia pada halaman ini.</p>
+        <div class="hero-aksi">
+          <a class="tombol tombol-utama" data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">Hubungi WhatsApp</a>
+          <a class="tombol tombol-lingan" href="/pesanan">Formulir Pemesanan</a>
+        </div>
+        <p class="teks-redup spasi-atas">Nomor WhatsApp yang tercantum pada konfigurasi adalah data CONTOH.</p>
+      </div>
+
+      <div class="kartu">
+        <div class="judul-bagian"><h2>QR Code Kemasan</h2></div>
+        <p>Website ini diakses melalui pemindaian QR Code pada kemasan BanaFitBrow (smart packaging). Pratinjau QR Code tersedia pada halaman admin.</p>
+        <p class="teks-redup">Berkas PNG QR Code untuk keperluan cetak dapat dibuat melalui perintah <code>npm run qr</code>.</p>
+        <a class="tombol tombol-cokelat tombol-kecil" href="/admin">Buka Dashboard Admin</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p data-kunci="produk.slogan"></p>
+        <p>Brownies tinggi protein berbahan pisang, oat, dan whey protein dengan kemasan berbasis QR Code.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/produk">Informasi Produk</a>
+          <a href="/gizi">Komposisi dan Gizi</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+          <a href="/media-sosial">Media Sosial</a>
+        </div>
+      </div>
+      <div>
+        <h4>Hubungi Kami</h4>
+        <div class="baris-tautan">
+          <a data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">WhatsApp Pemesanan</a>
+          <a href="/admin">Dashboard Admin</a>
+        </div>
+        <p>Ikuti akun resmi kami untuk informasi terbaru.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <p>&copy; <span data-tahun></span> BanaFitBrow. Hak cipta dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedback Konsumen — BanaFitBrow</title>
+  <meta name="description" content="Formulir feedback konsumen BanaFitBrow: rating 1 sampai 5 beserta komentar.">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <noscript>
+      <p class="pesan pesan-info terlihat">Halaman ini membutuhkan JavaScript untuk mengirim feedback.</p>
+    </noscript>
+    <p class="pesan pesan-galat" data-galat role="alert"></p>
+
+    <section class="bagian">
+      <span class="eyebrow">Bagian A · Feedback</span>
+      <div class="judul-bagian"><h1>Feedback Konsumen</h1></div>
+      <p>Masukan Anda membantu kami meningkatkan kualitas produk dan layanan. Berikan rating 1 sampai 5 beserta komentar Anda.</p>
+    </section>
+
+    <section class="bagian grid grid-2">
+      <form class="kartu formulir" id="formulirFeedback" novalidate>
+        <div class="bidang">
+          <span class="bantuan" id="labelRating">Rating Anda <span aria-hidden="true">*</span></span>
+          <div class="pilihan-rating" role="radiogroup" aria-labelledby="labelRating">
+            <input type="radio" id="rating5" name="rating" value="5" required><label for="rating5" title="5 — Sangat puas" aria-label="5 dari 5">&#9733;</label>
+            <input type="radio" id="rating4" name="rating" value="4"><label for="rating4" title="4 — Puas" aria-label="4 dari 5">&#9733;</label>
+            <input type="radio" id="rating3" name="rating" value="3"><label for="rating3" title="3 — Cukup" aria-label="3 dari 5">&#9733;</label>
+            <input type="radio" id="rating2" name="rating" value="2"><label for="rating2" title="2 — Kurang" aria-label="2 dari 5">&#9733;</label>
+            <input type="radio" id="rating1" name="rating" value="1"><label for="rating1" title="1 — Sangat kurang" aria-label="1 dari 5">&#9733;</label>
+          </div>
+          <span class="nilai-rating" id="nilaiRating">Belum ada rating dipilih</span>
+        </div>
+
+        <div class="bidang">
+          <label for="namaFeedback">Nama <span class="bantuan">(opsional)</span></label>
+          <input type="text" id="namaFeedback" name="nama" maxlength="60" autocomplete="name" placeholder="Nama Anda">
+        </div>
+
+        <div class="bidang">
+          <label for="komentar">Komentar <span aria-hidden="true">*</span></label>
+          <textarea id="komentar" name="komentar" maxlength="500" required placeholder="Tuliskan pendapat Anda mengenai rasa, tekstur, kemasan, atau pelayanan"></textarea>
+          <span class="bantuan">Minimal 3 karakter, maksimal 500 karakter.</span>
+        </div>
+
+        <div class="hero-aksi">
+          <button class="tombol tombol-utama" type="submit" id="tombolKirimFeedback">Kirim Feedback</button>
+        </div>
+
+        <p class="pesan" id="pesanFeedback" role="status" aria-live="polite"></p>
+      </form>
+
+      <div>
+        <div class="kartu rata-tengah">
+          <div class="judul-bagian"><h2>Rating Konsumen</h2></div>
+          <div class="statistik">
+            <div class="angka" id="rataRata">—</div>
+            <div class="keterangan">Rata-rata dari <span id="jumlahFeedback">0</span> feedback</div>
+          </div>
+          <p class="teks-redup spasi-atas">Ringkasan feedback ditampilkan berdasarkan data yang tersimpan pada server.</p>
+        </div>
+
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Feedback Terbaru</h2></div>
+          <div id="daftarFeedback"><p class="tidak-ada">Memuat data feedback...</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p data-kunci="produk.slogan"></p>
+        <p>Brownies tinggi protein berbahan pisang, oat, dan whey protein dengan kemasan berbasis QR Code.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/produk">Informasi Produk</a>
+          <a href="/gizi">Komposisi dan Gizi</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+          <a href="/media-sosial">Media Sosial</a>
+        </div>
+      </div>
+      <div>
+        <h4>Hubungi Kami</h4>
+        <div class="baris-tautan">
+          <a data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">WhatsApp Pemesanan</a>
+          <a href="/admin">Dashboard Admin</a>
+        </div>
+        <p>Ikuti akun resmi kami untuk informasi terbaru.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <p>&copy; <span data-tahun></span> BanaFitBrow. Hak cipta dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/feedback.js"></script>
+</body>
+</html>

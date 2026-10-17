@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Komposisi dan Kandungan Gizi — BanaFitBrow</title>
+  <meta name="description" content="Daftar bahan BanaFitBrow dan informasi kandungan protein per sajian.">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <noscript>
+      <p class="pesan pesan-info terlihat">Halaman ini membutuhkan JavaScript untuk menampilkan data produk.</p>
+    </noscript>
+    <p class="pesan pesan-galat" data-galat role="alert"></p>
+
+    <section class="bagian">
+      <span class="eyebrow">Bagian A · Komposisi dan Kandungan Gizi</span>
+      <div class="judul-bagian"><h1>Komposisi dan Kandungan Gizi</h1></div>
+
+      <div class="grid grid-2">
+        <div class="kartu">
+          <div class="statistik" data-render="ringkasanGizi"></div>
+          <p class="teks-redup spasi-atas">Nilai gizi berikut disajikan per porsi.</p>
+          <p class="teks-redup">Porsi: <span data-kunci="gizi.porsi"></span></p>
+        </div>
+        <div class="kartu">
+          <h3>Bahan Utama Sumber Protein</h3>
+          <ul class="daftar-titik" data-render="daftar" data-sumber="bahanUtama"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="bagian">
+      <div class="judul-bagian"><h2>Tabel Kandungan Gizi</h2></div>
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <div class="bungkus-tabel" data-render="gizi"></div>
+      <p class="teks-redup spasi-atas" data-kunci="gizi.ket"></p>
+      <p class="teks-redup" data-kunci="gizi.catatanSemua"></p>
+    </section>
+
+    <section class="bagian">
+      <div class="judul-bagian"><h2>Daftar Bahan</h2></div>
+      <div class="bungkus-tabel">
+        <table class="data">
+          <thead>
+            <tr><th>Bahan</th><th>Manfaat dan Peran dalam Produk</th></tr>
+          </thead>
+          <tbody id="daftarBahan"></tbody>
+        </table>
+      </div>
+      <p class="teks-redup spasi-atas">Komposisi bahan dapat berubah sewaktu-waktu sesuai formula produksi terbaru.</p>
+    </section>
+
+    <section class="bagian kartu">
+      <div class="judul-bagian"><h2>Pemesanan</h2></div>
+      <p>Produk dapat dipesan melalui formulir pemesanan atau melalui WhatsApp.</p>
+      <div class="hero-aksi">
+        <a class="tombol tombol-utama" href="/pesanan">Menuju Formulir Pemesanan</a>
+        <a class="tombol tombol-lingan" href="/produk">Informasi Produk</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p data-kunci="produk.slogan"></p>
+        <p>Brownies tinggi protein berbahan pisang, oat, dan whey protein dengan kemasan berbasis QR Code.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/produk">Informasi Produk</a>
+          <a href="/gizi">Komposisi dan Gizi</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+          <a href="/media-sosial">Media Sosial</a>
+        </div>
+      </div>
+      <div>
+        <h4>Hubungi Kami</h4>
+        <div class="baris-tautan">
+          <a data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">WhatsApp Pemesanan</a>
+          <a href="/admin">Dashboard Admin</a>
+        </div>
+        <p>Ikuti akun resmi kami untuk informasi terbaru.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <p>&copy; <span data-tahun></span> BanaFitBrow. Hak cipta dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/gizi.js"></script>
+</body>
+</html>

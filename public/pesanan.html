@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pemesanan — BanaFitBrow</title>
+  <meta name="description" content="Formulir pemesanan brownies tinggi protein BanaFitBrow dan tautan langsung ke WhatsApp.">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <noscript>
+      <p class="pesan pesan-info terlihat">Halaman ini membutuhkan JavaScript untuk mengirim pesanan.</p>
+    </noscript>
+    <p class="pesan pesan-galat" data-galat role="alert"></p>
+
+    <section class="bagian">
+      <span class="eyebrow">Bagian A · Pemesanan</span>
+      <div class="judul-bagian"><h1>Formulir Pemesanan</h1></div>
+      <p>Isi formulir berikut untuk melakukan pemesanan. Pesanan akan tersimpan dan diproses oleh pengelola BanaFitBrow.</p>
+    </section>
+
+    <section class="bagian grid grid-2">
+      <form class="kartu formulir" id="formulirPesanan" novalidate>
+        <div class="bidang">
+          <label for="nama">Nama Lengkap <span aria-hidden="true">*</span></label>
+          <input type="text" id="nama" name="nama" maxlength="100" autocomplete="name" required placeholder="Nama pemesan">
+          <span class="bantuan">Minimal 3 karakter.</span>
+        </div>
+
+        <div class="bidang">
+          <label for="whatsapp">Nomor WhatsApp <span aria-hidden="true">*</span></label>
+          <input type="tel" id="whatsapp" name="whatsapp" inputmode="numeric" maxlength="16" autocomplete="tel" required placeholder="6281234567890">
+          <span class="bantuan">Gunakan format internasional tanpa tanda tambah, contoh 6281234567890.</span>
+        </div>
+
+        <div class="bidang">
+          <label for="produk">Pilihan Produk <span aria-hidden="true">*</span></label>
+          <select id="produk" name="produk" required data-render="produkPilihan"></select>
+        </div>
+
+        <div class="bidang">
+          <label for="jumlah">Jumlah <span aria-hidden="true">*</span></label>
+          <input type="number" id="jumlah" name="jumlah" min="1" max="500" step="1" value="1" required>
+          <span class="bantuan">Jumlah antara 1 dan 500 kotak.</span>
+        </div>
+
+        <div class="bidang">
+          <label for="catatan">Catatan</label>
+          <textarea id="catatan" name="catatan" maxlength="500" placeholder="Contoh: pengiriman hari Sabtu, alamat lengkap, atau permintaan khusus"></textarea>
+          <span class="bantuan">Opsional, maksimal 500 karakter.</span>
+        </div>
+
+        <div class="persetujuan">
+          <input type="checkbox" id="persetujuan" name="persetujuan" required>
+          <label for="persetujuan">
+            Saya setuju bahwa data pelanggan yang saya isi digunakan untuk keperluan pemrosesan pesanan,
+            konfirmasi pemesanan, dan layanan konsumen BanaFitBrow.
+          </label>
+        </div>
+
+        <div class="bidang">
+          <span class="bantuan">Perkiraan total: <strong id="perkiraanTotal">Rp0</strong></span>
+        </div>
+
+        <div class="hero-aksi">
+          <button class="tombol tombol-utama" type="submit" id="tombolKirim">Kirim Pesanan</button>
+          <!-- <button class="tombol tombol-lingan" type="button" id="tombolWa">Kirim via WhatsApp</button> -->
+        </div>
+
+        <p class="pesan" id="pesanFormulir" role="status" aria-live="polite"></p>
+      </form>
+
+      <div>
+        <div class="kartu">
+          <div class="judul-bagian"><h2>Varian Produk</h2></div>
+          <div class="grid" data-render="varian"></div>
+        </div>
+        <!-- <div class="kartu">
+          <h3>Pemesanan Langsung</h3>
+          <p>Apabila Anda lebih memilih pemesanan melalui WhatsApp, tekan tombol berikut. Isian formulir akan ikut terbawa ke dalam pesan.</p>
+          <a class="tombol tombol-cokelat" data-render="kontakWa" id="tautanWaLangsung" target="_blank" rel="noopener noreferrer" href="/pesanan">Buka WhatsApp</a>
+        </div> -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p data-kunci="produk.slogan"></p>
+        <p>Brownies tinggi protein berbahan pisang, oat, dan whey protein dengan kemasan berbasis QR Code.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/produk">Informasi Produk</a>
+          <a href="/gizi">Komposisi dan Gizi</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+          <a href="/media-sosial">Media Sosial</a>
+        </div>
+      </div>
+      <div>
+        <h4>Hubungi Kami</h4>
+        <div class="baris-tautan">
+          <a data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">WhatsApp Pemesanan</a>
+          <a href="/admin">Dashboard Admin</a>
+        </div>
+        <p>Ikuti akun resmi kami untuk informasi terbaru.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p>&copy; <span data-tahun></span> BanaFitBrow. Hak cipta dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/pesanan.js"></script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+/* Dashboard Admin — autentikasi sederhana, pesanan, feedback, pelanggan, rekap, dan QR. */
+(function () {
+  'use strict';
+
+  var layarMasuk = document.getElementById('layarMasuk');
+  var layarDasbor = document.getElementById('layarDasbor');
+  var formulirMasuk = document.getElementById('formulirMasuk');
+  var pesanMasuk = document.getElementById('pesanMasuk');
+  var pesanDasbor = document.getElementById('pesanDasbor');
+
+  var STATUS_SAH = ['baru', 'diproses', 'selesai'];
+  var dataPesanan = [];
+  var urutanTerbaru = false;
+
+  function tampilkan(kotak, jenis, teks) {
+    kotak.className = (kotak.id === 'pesanMasuk' ? 'pesan' : 'pesan') + ' terlihat ' + jenis;
+    kotak.textContent = teks;
+  }
+
+  function minta(url, opsi) {
+    return fetch(url, opsi).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) throw Object.assign(new Error(data.error || 'Permintaan gagal'), { status: res.status });
+        return data;
+      });
+    });
+  }
+
+  function selStatus(pesanan) {
+    var sel = document.createElement('select');
+    sel.setAttribute('aria-label', 'Status pesanan nomor ' + pesanan.id);
+    sel.style.font = 'inherit';
+    sel.style.fontSize = '0.88rem';
+    sel.style.padding = '6px 8px';
+    sel.style.borderRadius = '8px';
+    sel.style.border = '1.5px solid var(--garis)';
+
+    STATUS_SAH.forEach(function (status) {
+      var opsi = document.createElement('option');
+      opsi.value = status;
+      opsi.textContent = status;
+      if (status === pesanan.status) opsi.selected = true;
+      sel.appendChild(opsi);
+    });
+
+    sel.addEventListener('change', function () {
+      sel.disabled = true;
+      minta('/api/admin/pesanan/' + pesanan.id + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: sel.value })
+      })
+        .then(function () {
+          pesanan.status = sel.value;
+          tampilkan(pesanDasbor, 'pesan-sukses', 'Status pesanan nomor ' + pesanan.id + ' diperbarui menjadi "' + sel.value + '".');
+        })
+        .catch(function (err) {
+          sel.value = pesanan.status;
+          tampilkan(pesanDasbor, 'pesan-galat', err.message || 'Status gagal diperbarui.');
+        })
+        .finally(function () { sel.disabled = false; });
+    });
+
+    return sel;
+  }
+
+  function selSpans(status) {
+    var span = document.createElement('span');
+    span.className = 'status status-' + status;
+    span.textContent = status;
+    return span;
+  }
+
+  function td(teks, kelas) {
+    var cell = document.createElement('td');
+    if (kelas) cell.className = kelas;
+    cell.textContent = teks === undefined || teks === null ? '-' : teks;
+    return cell;
+  }
+
+  function kosong(baris, kolom) {
+    var tr = document.createElement('tr');
+    var cell = document.createElement('td');
+    cell.colSpan = kolom;
+    cell.className = 'tidak-ada';
+    cell.textContent = 'Belum ada data.';
+    tr.appendChild(cell);
+    return tr;
+  }
+
+  /* --- Muat data --------------------------------------------------------- */
+  function gambarPesanan() {
+    var tbody = document.getElementById('isiPesanan');
+    tbody.innerHTML = '';
+    if (!dataPesanan.length) { tbody.appendChild(kosong(0, 9)); return; }
+
+    var daftar = dataPesanan.slice().sort(function (a, b) {
+      return urutanTerbaru ? b.id - a.id : a.id - b.id;
+    });
+
+    daftar.forEach(function (p, indeks) {
+      var tr = document.createElement('tr');
+      tr.appendChild(td(indeks + 1));
+      tr.appendChild(td(BFB.tanggalManis(p.waktu)));
+      tr.appendChild(td(p.nama, 'bungkus'));
+      tr.appendChild(td(p.produk_nama, 'bungkus'));
+      tr.appendChild(td(p.jumlah));
+      tr.appendChild(td(BFB.rupiah(p.total)));
+
+      var cellStatus = document.createElement('td');
+      cellStatus.appendChild(selStatus(p));
+      var chip = document.createElement('span');
+      chip.style.display = 'block';
+      chip.style.marginTop = '6px';
+      chip.appendChild(selSpans(p.status));
+      cellStatus.appendChild(chip);
+      tr.appendChild(cellStatus);
+
+      tr.appendChild(td(p.whatsapp));
+      tr.appendChild(td(p.catatan || '-', 'bungkus'));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function muatPesanan() {
+    return minta('/api/admin/pesanan').then(function (data) {
+      dataPesanan = data.daftar;
+      gambarPesanan();
+    });
+  }
+
+  function muatFeedback() {
+    return minta('/api/admin/feedback').then(function (data) {
+      document.getElementById('ringkasRating').textContent = data.jumlah ? data.rataRata + ' / 5' : '—';
+      document.getElementById('ringkasJumlah').textContent = data.jumlah;
+      document.getElementById('statRating').textContent = data.jumlah ? data.rataRata + ' / 5' : '—';
+
+      var tbody = document.getElementById('isiFeedback');
+      tbody.innerHTML = '';
+      if (!data.daftar.length) { tbody.appendChild(kosong(0, 5)); return; }
+
+      data.daftar.forEach(function (f) {
+        var tr = document.createElement('tr');
+        tr.appendChild(td(f.id));
+        tr.appendChild(td(BFB.tanggalManis(f.waktu)));
+        tr.appendChild(td(f.nama || 'Anonim'));
+        tr.appendChild(td(f.rating + ' / 5'));
+        tr.appendChild(td(f.komentar, 'bungkus'));
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  function muatPelanggan() {
+    return minta('/api/admin/pelanggan').then(function (data) {
+      var tbody = document.getElementById('isiPelanggan');
+      tbody.innerHTML = '';
+      if (!data.daftar.length) { tbody.appendChild(kosong(0, 6)); return; }
+
+      data.daftar.forEach(function (c) {
+        var tr = document.createElement('tr');
+        tr.appendChild(td(c.nama, 'bungkus'));
+        tr.appendChild(td(c.whatsapp));
+        tr.appendChild(td(c.jumlahPesanan));
+        tr.appendChild(td(c.jumlahItem));
+        tr.appendChild(td(BFB.rupiah(c.totalNilai)));
+        tr.appendChild(td(BFB.tanggalManis(c.terakhir)));
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  function muatRekap() {
+    return minta('/api/admin/rekap').then(function (data) {
+      document.getElementById('statPesanan').textContent = data.totalPesanan;
+      document.getElementById('statItem').textContent = data.totalItem;
+      document.getElementById('statNilai').textContent = BFB.rupiah(data.totalNilai);
+      document.getElementById('infoPenyimpanan').textContent = data.penyimpanan;
+
+      var tbodyStatus = document.getElementById('isiStatus');
+      tbodyStatus.innerHTML = '';
+      STATUS_SAH.forEach(function (status) {
+        var tr = document.createElement('tr');
+        var cell = document.createElement('td');
+        cell.appendChild(selSpans(status));
+        tr.appendChild(cell);
+        tr.appendChild(td(data.perStatus[status] || 0));
+        tbodyStatus.appendChild(tr);
+      });
+
+      var tbodyProduk = document.getElementById('isiPerProduk');
+      tbodyProduk.innerHTML = '';
+      if (!data.perProduk.length) {
+        tbodyProduk.appendChild(kosong(0, 4));
+      } else {
+        data.perProduk.forEach(function (p) {
+          var tr = document.createElement('tr');
+          tr.appendChild(td(p.produkNama, 'bungkus'));
+          tr.appendChild(td(p.jumlahPesanan));
+          tr.appendChild(td(p.jumlahItem));
+          tr.appendChild(td(BFB.rupiah(p.totalNilai)));
+          tbodyProduk.appendChild(tr);
+        });
+      }
+    });
+  }
+
+  function muatSemua() {
+    pesanDasbor.className = 'pesan';
+    return Promise.all([muatPesanan(), muatFeedback(), muatPelanggan(), muatRekap()])
+      .then(function () { return true; })
+      .catch(function (err) {
+        tampilkan(pesanDasbor, 'pesan-galat', err.message || 'Data gagal dimuat.');
+        return false;
+      });
+  }
+
+  /* --- Layar ------------------------------------------------------------ */
+  function tampilkanDasbor() {
+    layarMasuk.classList.add('sembunyi');
+    layarDasbor.classList.remove('sembunyi');
+    BFB.konfigurasi().then(function (cfg) {
+      if (cfg && cfg.proyek) {
+        document.getElementById('alamatQr').textContent = window.location.origin;
+      }
+    }).catch(function () { /* abaikan */ });
+    muatSemua();
+  }
+
+  function tampilkanMasuk() {
+    layarDasbor.classList.add('sembunyi');
+    layarMasuk.classList.remove('sembunyi');
+  }
+
+  formulirMasuk.addEventListener('submit', function (event) {
+    event.preventDefault();
+    pesanMasuk.className = 'pesan';
+    var kataSandi = document.getElementById('kataSandi').value;
+
+    if (!kataSandi) {
+      tampilkan(pesanMasuk, 'pesan-galat', 'Kata sandi wajib diisi.');
+      return;
+    }
+
+    minta('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kataSandi: kataSandi })
+    })
+      .then(function () {
+        formulirMasuk.reset();
+        tampilkanDasbor();
+      })
+      .catch(function (err) {
+        tampilkan(pesanMasuk, 'pesan-galat', err.message || 'Gagal masuk.');
+      });
+  });
+
+  document.getElementById('tombolKeluar').addEventListener('click', function () {
+    minta('/api/admin/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      .catch(function () { /* abaikan */ })
+      .finally(function () { tampilkanMasuk(); });
+  });
+
+  document.getElementById('tombolMuat').addEventListener('click', function () {
+    tampilkan(pesanDasbor, 'pesan-info', 'Memuat ulang data...');
+    muatSemua().then(function () {
+      tampilkan(pesanDasbor, 'pesan-sukses', 'Data berhasil dimuat ulang.');
+    });
+  });
+
+    document.getElementById('urutanPesanan').addEventListener('change', function (event) {
+    urutanTerbaru = event.target.value === 'baru';
+    gambarPesanan();
+  });
+
+  /* --- Tab -------------------------------------------------------------- */
+  var tabIds = ['pesanan', 'feedback', 'pelanggan', 'rekap', 'qr'];
+  tabIds.forEach(function (id) {
+    var tombol = document.getElementById('tab-' + id);
+    tombol.addEventListener('click', function () {
+      tabIds.forEach(function (lain) {
+        var panel = document.getElementById('panel-' + lain);
+        var aktif = lain === id;
+        document.getElementById('tab-' + lain).setAttribute('aria-selected', aktif ? 'true' : 'false');
+        panel.hidden = !aktif;
+      });
+    });
+  });
+
+  /* --- Pemeriksaan sesi -------------------------------------------------- */
+  minta('/api/admin/sesi')
+    .then(tampilkanDasbor)
+    .catch(tampilkanMasuk);
+})();

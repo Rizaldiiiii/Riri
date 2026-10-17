@@ -1,0 +1,25 @@
+# Dependensi
+node_modules/
+
+# Konfigurasi lingkungan
+.env
+
+# Basis data / berkas penyimpanan
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/*.sqlite
+data/*.sqlite3
+data/toko.json
+data/toko.json.tmp
+data/*.tmp
+
+# Hasil generator QR Code
+qr/*.png
+
+# Log dan berkas sistem
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db

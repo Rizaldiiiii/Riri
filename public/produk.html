@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informasi Produk — BanaFitBrow</title>
+  <meta name="description" content="Deskripsi, keunggulan, dan cara penyimpanan brownies tinggi protein BanaFitBrow.">
+  <link rel="icon" href="/assets/logo-banafitbrow.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="kop">
+    <div class="kop-dalam">
+      <a class="merek" href="/"><img src="/assets/logo-banafitbrow.svg" alt=""><span>BanaFitBrow</span></a>
+      <button class="tombol-menu" id="tombolMenu" type="button" aria-expanded="false" aria-controls="navigasi">Menu</button>
+      <nav class="navigasi" id="navigasi" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/produk">Informasi Produk</a>
+        <a href="/gizi">Komposisi dan Gizi</a>
+        <a href="/pesanan">Pemesanan</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/media-sosial">Media Sosial</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="utama kontainer">
+    <noscript>
+      <p class="pesan pesan-info terlihat">Halaman ini membutuhkan JavaScript untuk menampilkan data produk.</p>
+    </noscript>
+    <p class="pesan pesan-galat" data-galat role="alert"></p>
+
+    <section class="bagian">
+      <span class="eyebrow">Bagian A · Informasi Produk</span>
+      <div class="judul-bagian"><h1 data-kunci="produk.nama">BanaFitBrow</h1></div>
+      <div class="kartu">
+        <h2>Tentang Produk</h2>
+        <p data-kunci="produk.deskripsi"></p>
+        <p class="teks-redup">Judul proyek: <span data-kunci="proyek.judul"></span></p>
+      </div>
+    </section>
+
+    <section class="bagian grid grid-2">
+      <div class="kartu">
+        <div class="judul-bagian"><h2>Keunggulan</h2></div>
+        <ul class="daftar-titik" data-render="daftar" data-sumber="keunggulan"></ul>
+      </div>
+      <div class="kartu">
+        <div class="judul-bagian"><h2>Cara Penyimpanan</h2></div>
+        <ul class="daftar-titik" data-render="daftar" data-sumber="caraPenyimpanan"></ul>
+      </div>
+    </section>
+
+    <section class="bagian">
+      <div class="judul-bagian"><h2>Varian dan Harga</h2></div>
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <div class="grid grid-3" data-render="varian"></div>
+    </section>
+
+    <section class="bagian kartu">
+      <div class="judul-bagian"><h2>Pemesanan</h2></div>
+      <p>Pemesanan dilakukan melalui formulir pemesanan pada halaman ini, atau melalui WhatsApp pada nomor yang tercantum pada kemasan.</p>
+      <div class="hero-aksi">
+        <a class="tombol tombol-utama" href="/pesanan">Menuju Formulir Pemesanan</a>
+        <a class="tombol tombol-lingan" href="/gizi">Komposisi dan Gizi</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="kaki">
+    <div class="kontainer kolom">
+      <div>
+        <h4>BanaFitBrow</h4>
+        <p data-kunci="produk.slogan"></p>
+        <p>Brownies tinggi protein berbahan pisang, oat, dan whey protein dengan kemasan berbasis QR Code.</p>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <div class="baris-tautan">
+          <a href="/produk">Informasi Produk</a>
+          <a href="/gizi">Komposisi dan Gizi</a>
+          <a href="/pesanan">Pemesanan</a>
+          <a href="/feedback">Feedback</a>
+          <a href="/media-sosial">Media Sosial</a>
+        </div>
+      </div>
+      <div>
+        <h4>Hubungi Kami</h4>
+        <div class="baris-tautan">
+          <a data-render="kontakWa" target="_blank" rel="noopener noreferrer" href="/pesanan">WhatsApp Pemesanan</a>
+          <a href="/admin">Dashboard Admin</a>
+        </div>
+        <p>Ikuti akun resmi kami untuk informasi terbaru.</p>
+      </div>
+    </div>
+    <div class="kontainer spasi-atas">
+      <p class="catatan-contoh" data-render="catatanContoh"></p>
+      <p>&copy; <span data-tahun></span> BanaFitBrow. Hak cipta dilindungi.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
