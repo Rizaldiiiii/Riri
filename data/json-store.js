@@ -29,16 +29,25 @@ function muatBerkas() {
 /**
  * Melengkapi pesanan lama yang belum memiliki data metode penerimaan
  * dengan nilai bawaan: metode "jemput" dan ongkos kirim 0.
+ * Status ongkir diturunkan dari isi pesanan bila belum tersimpan:
+ * jemput menjadi "tidak_perlu"; antar dengan jarak terisi menjadi "terkonfirmasi";
+ * antar tanpa jarak menjadi "menunggu".
  */
 function normalisasiPesanan(pesanan) {
   const hasil = Object.assign({}, pesanan);
   if (!hasil.metode) hasil.metode = 'jemput';
   if (typeof hasil.alamat !== 'string') hasil.alamat = hasil.alamat ? String(hasil.alamat) : '';
+  if (typeof hasil.lokasi_url !== 'string') hasil.lokasi_url = hasil.lokasi_url ? String(hasil.lokasi_url) : '';
   if (!Number.isFinite(Number(hasil.jarak_km)) || hasil.jarak_km === undefined || hasil.jarak_km === null) {
     hasil.jarak_km = 0;
   }
   if (hasil.ongkir === undefined || hasil.ongkir === null || !Number.isFinite(Number(hasil.ongkir))) {
     hasil.ongkir = 0;
+  }
+  const statusSah = ['tidak_perlu', 'menunggu', 'terkonfirmasi'];
+  if (!statusSah.includes(hasil.status_ongkir)) {
+    hasil.status_ongkir =
+      hasil.metode === 'antar' ? (Number(hasil.jarak_km) > 0 ? 'terkonfirmasi' : 'menunggu') : 'tidak_perlu';
   }
   return hasil;
 }
@@ -78,6 +87,21 @@ class JsonStore {
 
   daftarPesanan() {
     return this.data.pesanan.map(normalisasiPesanan).sort((a, b) => b.id - a.id);
+  }
+
+  /**
+   * Menyimpan hasil pengukuran jarak admin: jarak_km, ongkir,
+   * dan status ongkir "terkonfirmasi".
+   */
+  ubahOngkirPesanan(id, jarakKm, ongkir) {
+    const rekaman = this.data.pesanan.find((p) => Number(p.id) === Number(id));
+    if (!rekaman) return null;
+    rekaman.jarak_km = Number(jarakKm);
+    rekaman.ongkir = Number(ongkir);
+    rekaman.status_ongkir = 'terkonfirmasi';
+    rekaman.diperbarui = new Date().toISOString();
+    this.simpan();
+    return normalisasiPesanan(rekaman);
   }
 
   ubahStatusPesanan(id, status) {

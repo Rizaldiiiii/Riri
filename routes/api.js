@@ -31,7 +31,7 @@ router.get('/produk', (req, res) => {
 
 /** POST /api/pesanan — menyimpan pesanan konsumen. */
 router.post('/pesanan', (req, res) => {
-  const hasil = validasiPesanan(req.body, produkData.varian, produkData.pengiriman);
+  const hasil = validasiPesanan(req.body, produkData.varian);
   if (!hasil.ok) {
     return res.status(400).json({ error: hasil.error });
   }
@@ -49,9 +49,14 @@ router.post('/pesanan', (req, res) => {
         total: rekaman.total,
         metode: rekaman.metode,
         alamat: rekaman.alamat,
-        jarak_km: rekaman.jarak_km,
+        lokasi_url: rekaman.lokasi_url || '',
         ongkir: rekaman.ongkir,
-        totalPembayaran: (Number(rekaman.total) || 0) + (Number(rekaman.ongkir) || 0),
+        status_ongkir: rekaman.status_ongkir || '',
+        // Total pembayaran hanya pasti bila ongkir sudah tidak menunggu konfirmasi.
+        totalPembayaran:
+          rekaman.status_ongkir === 'menunggu'
+            ? null
+            : (Number(rekaman.total) || 0) + (Number(rekaman.ongkir) || 0),
         status: rekaman.status
       }
     });

@@ -1,7 +1,6 @@
 'use strict';
 
 const crypto = require('crypto');
-const { hitungOngkir } = require('../public/js/ongkir');
 
 /** Utilitas bersama untuk seluruh rute API. */
 
@@ -71,12 +70,13 @@ function teks(value, panjangMaks) {
 
 /**
  * Validasi isi formulir pemesanan.
- * Metode penerimaan, alamat, dan jarak divalidasi di sini, sedangkan ongkos kirim
- * selalu dihitung ulang di server memakai konfigurasi `pengiriman` dari data/produk.js.
- * @param {object} konfigPengiriman Isi kunci `pengiriman` dari data/produk.js.
+ * Metode penerimaan, alamat, dan tautan lokasi divalidasi di sini.
+ * Jarak dan ongkos kirim tidak pernah diterima dari pembeli: ongkir untuk metode
+ * antar ditentukan admin melalui dashboard dan disimpan dengan status "menunggu"
+ * sampai dikonfirmasi.
  * @returns {{ok: true, data: object}|{ok: false, error: string}}
  */
-function validasiPesanan(body, daftarVarian, konfigPengiriman) {
+function validasiPesanan(body, daftarVarian) {
   const nama = teks(body && body.nama, 100);
   const whatsapp = teks(body && body.whatsapp, 25).replace(/[^\d+]/g, '');
   const produkId = teks(body && body.produkId, 50);
@@ -99,7 +99,6 @@ function validasiPesanan(body, daftarVarian, konfigPengiriman) {
   if (!varian) return { ok: false, error: 'Pilihan produk tidak dikenal.' };
 
   const metode = teks(body && body.metode, 10).toLowerCase();
-  const konfig = konfigPengiriman || {};
 
   if (metode !== JEMPUT && metode !== ANTAR) {
     return {
@@ -109,8 +108,8 @@ function validasiPesanan(body, daftarVarian, konfigPengiriman) {
   }
 
   let alamat = '';
-  let jarakKm = 0;
-  let ongkir = 0;
+  let lokasiUrl = '';
+  let statusOngkir = 'tidak_perlu';
 
   if (metode === ANTAR) {
     // Dibaca dengan kepala ruang 1000 karakter agar alamat yang terlalu panjang
@@ -123,14 +122,17 @@ function validasiPesanan(body, daftarVarian, konfigPengiriman) {
       return { ok: false, error: 'Alamat lengkap untuk metode antar minimal 10 karakter.' };
     }
 
-    // Nilai ongkir dari peramban tidak pernah dipercaya; selalu dihitung ulang di server.
-    const jarak = body && body.jarak !== undefined && body.jarak !== null && body.jarak !== ''
-      ? Number(body.jarak)
-      : Number.NaN;
-    const hitung = hitungOngkir(konfig, jarak);
-    if (!hitung.ok) return { ok: false, error: hitung.error };
-    jarakKm = jarak;
-    ongkir = hitung.ongkir;
+    // Tautan lokasi bersifat opsional dan hanya boleh berupa tautan http:// atau https://.
+    lokasiUrl = teks(body && body.lokasiUrl, 600);
+    if (lokasiUrl.length > 500) {
+      return { ok: false, error: 'Tautan lokasi maksimal 500 karakter.' };
+    }
+    if (lokasiUrl && !/^https?:\/\//i.test(lokasiUrl)) {
+      return { ok: false, error: 'Tautan lokasi harus berawalan http:// atau https://.' };
+    }
+
+    // Jarak dan ongkir dari pembeli diabaikan; ongkir ditentukan admin.
+    statusOngkir = 'menunggu';
   }
 
   return {
@@ -145,8 +147,10 @@ function validasiPesanan(body, daftarVarian, konfigPengiriman) {
       total: (Number(varian.harga) || 0) * jumlah,
       metode,
       alamat,
-      jarak_km: jarakKm,
-      ongkir,
+      lokasi_url: lokasiUrl,
+      jarak_km: 0,
+      ongkir: 0,
+      status_ongkir: statusOngkir,
       catatan,
       persetujuan: 1
     }
@@ -155,15 +159,27 @@ function validasiPesanan(body, daftarVarian, konfigPengiriman) {
 
 /**
  * Melengkapi pesanan lama yang belum memiliki data metode penerimaan
- * dengan nilai bawaan: metode "jemput" dan ongkos kirim 0.
+ * dengan nilai bawaan: metode "jemput", alamat dan tautan lokasi kosong,
+ * ongkos kirim 0, serta status ongkir diturunkan dari isi pesanan
+ * (jemput: tidak_perlu; antar berjarak: terkonfirmasi; antar tanpa jarak: menunggu).
  */
 function bawaanPesanan(pesanan) {
   const p = pesanan || {};
+  const metode = p.metode || JEMPUT;
+  const jarakKm = Number(p.jarak_km) || 0;
+  const statusSah = ['tidak_perlu', 'menunggu', 'terkonfirmasi'];
+  const statusOngkir = statusSah.includes(p.status_ongkir)
+    ? p.status_ongkir
+    : metode === ANTAR
+      ? (jarakKm > 0 ? 'terkonfirmasi' : 'menunggu')
+      : 'tidak_perlu';
   return {
-    metode: p.metode || JEMPUT,
+    metode,
     alamat: p.alamat || '',
-    jarak_km: Number(p.jarak_km) || 0,
-    ongkir: Number(p.ongkir) || 0
+    lokasi_url: typeof p.lokasi_url === 'string' ? p.lokasi_url : '',
+    jarak_km: jarakKm,
+    ongkir: Number(p.ongkir) || 0,
+    status_ongkir: statusOngkir
   };
 }
 
@@ -181,10 +197,15 @@ function validasiFeedback(body) {
   return { ok: true, data: { nama, rating, komentar } };
 }
 
-/** Mengubah baris data menjadi teks CSV (dengan BOM agar kompatibel Excel). */
+/**
+ * Mengubah baris data menjadi teks CSV (dengan BOM agar kompatibel Excel).
+ * Sel yang berawalan karakter rumus (=, +, -, @) diberi awalan apostrof
+ * agar tidak dieksekusi sebagai rumus oleh aplikasi spreadsheet.
+ */
 function keCsv(kolom, baris) {
   const sel = (nilai) => {
-    const teksNilai = String(nilai === undefined || nilai === null ? '' : nilai);
+    let teksNilai = String(nilai === undefined || nilai === null ? '' : nilai);
+    if (/^[=+\-@]/.test(teksNilai)) teksNilai = "'" + teksNilai;
     return '"' + teksNilai.replace(/"/g, '""') + '"';
   };
   const garis = [kolom.map(sel).join(',')];

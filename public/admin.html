@@ -63,6 +63,7 @@
         <div class="statistik"><div class="angka" id="statItem">0</div><div class="keterangan">Total item dipesan</div></div>
         <div class="statistik"><div class="angka" id="statNilai">Rp0</div><div class="keterangan">Total nilai pesanan</div></div>
         <div class="statistik"><div class="angka" id="statRating">—</div><div class="keterangan">Rata-rata rating</div></div>
+        <div class="statistik"><div class="angka" id="statOngkirMenunggu">0</div><div class="keterangan">Ongkir menunggu konfirmasi</div></div>
       </div>
 
       <div class="tab-bar" role="tablist" aria-label="Bagian dashboard">
@@ -97,7 +98,7 @@
               <tbody id="isiPesanan"><tr><td colspan="9">Memuat data...</td></tr></tbody>
             </table>
           </div>
-          <p class="teks-redup spasi-atas">Ubah status pesanan melalui pilihan pada kolom Status. Pilihan status: baru, diproses, dan selesai. Kolom Total Bayar menampilkan total pembayaran (produk ditambah ongkos kirim), sedangkan rincian produk dan ongkos kirim tercantum pada kolom Keterangan.</p>
+          <p class="teks-redup spasi-atas">Ubah status pesanan melalui pilihan pada kolom Status. Pilihan status: baru, diproses, dan selesai. Kolom Total Bayar menampilkan total pembayaran (produk ditambah ongkos kirim), sedangkan rincian produk dan ongkos kirim tercantum pada kolom Keterangan. Pesanan metode antar yang ongkirnya masih menunggu ditandai "Ongkir menunggu"; isi jarak hasil pengukuran Google Maps lalu tekan "Hitung dan Simpan" untuk menentukan ongkos kirim, kemudian konfirmasi melalui WhatsApp.</p>
         </div>
       </section>
 
@@ -133,9 +134,10 @@
       <section class="tab-panel" id="panel-rekap" role="tabpanel" aria-labelledby="tab-rekap" hidden>
         <div class="kartu">
           <div class="judul-bagian"><h2>Rekap Penjualan</h2></div>
-          <div class="kotak-statistik dua-kolom">
+          <div class="kotak-statistik">
             <div class="statistik"><div class="angka" id="statNilaiProduk">Rp0</div><div class="keterangan">Total nilai produk</div></div>
-            <div class="statistik"><div class="angka" id="statOngkir">Rp0</div><div class="keterangan">Total ongkos kirim</div></div>
+            <div class="statistik"><div class="angka" id="statOngkir">Rp0</div><div class="keterangan">Total ongkos kirim (terkonfirmasi)</div></div>
+            <div class="statistik"><div class="angka" id="statOngkirMenungguRekap">0</div><div class="keterangan">Pesanan menunggu ongkir</div></div>
           </div>
           <div class="bungkus-tabel">
             <table class="data">

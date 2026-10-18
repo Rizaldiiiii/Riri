@@ -88,6 +88,155 @@
     return tr;
   }
 
+  /** Normalisasi nomor WhatsApp menjadi format internasional (awalan 0 menjadi 62). */
+  function nomorWaIndonesia(nomor) {
+    var bersih = BFB.nomorBersih(nomor);
+    if (bersih.charAt(0) === '0') bersih = '62' + bersih.slice(1);
+    return bersih;
+  }
+
+  /** Konfigurasi pengiriman (tabel tarif) untuk pratinjau dan perhitungan ongkir. */
+  function konfigPengiriman() {
+    return BFB.konfigurasi().then(function (cfg) {
+      return (cfg && cfg.pengiriman) || null;
+    });
+  }
+
+  /**
+   * Kotak isian jarak untuk pesanan antar yang ongkirnya masih menunggu:
+   * pratinjau ongkir saat jarak diketik, lalu tombol "Hitung dan Simpan".
+   */
+  function kotakHitungOngkir(p) {
+    var bungkus = document.createElement('span');
+    bungkus.style.display = 'block';
+    bungkus.style.marginTop = '6px';
+
+    var penanda = document.createElement('span');
+    penanda.className = 'status status-menunggu';
+    penanda.textContent = 'Ongkir menunggu';
+    bungkus.appendChild(penanda);
+
+    var baris = document.createElement('span');
+    baris.style.display = 'flex';
+    baris.style.flexWrap = 'wrap';
+    baris.style.gap = '6px';
+    baris.style.alignItems = 'center';
+    baris.style.marginTop = '6px';
+
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0.1';
+    input.step = 'any';
+    input.placeholder = 'Jarak (km)';
+    input.setAttribute('aria-label', 'Jarak pesanan nomor ' + p.id + ' dalam kilometer');
+    input.style.width = '112px';
+    input.style.font = 'inherit';
+    input.style.fontSize = '0.88rem';
+    input.style.padding = '6px 8px';
+    input.style.borderRadius = '8px';
+    input.style.border = '1.5px solid var(--garis)';
+
+    var tombol = document.createElement('button');
+    tombol.type = 'button';
+    tombol.className = 'tombol tombol-utama tombol-kecil';
+    tombol.textContent = 'Hitung dan Simpan';
+
+    var pratinjau = document.createElement('span');
+    pratinjau.className = 'teks-redup';
+    pratinjau.style.display = 'block';
+    pratinjau.style.fontSize = '0.85rem';
+    pratinjau.style.marginTop = '4px';
+
+    input.addEventListener('input', function () {
+      var nilai = input.value.trim();
+      if (nilai === '') {
+        pratinjau.textContent = '';
+        return;
+      }
+      konfigPengiriman().then(function (konfig) {
+        if (!konfig) {
+          pratinjau.textContent = 'Konfigurasi tarif ongkos kirim belum tersedia.';
+          return;
+        }
+        var hasil = BfbOngkir.hitungOngkir(konfig, Number(nilai));
+        pratinjau.textContent = hasil.ok
+          ? 'Pratinjau ongkir: ' + BFB.rupiah(hasil.ongkir)
+          : hasil.error;
+      });
+    });
+
+    tombol.addEventListener('click', function () {
+      var nilai = Number(input.value);
+      if (input.value.trim() === '' || !Number.isFinite(nilai)) {
+        tampilkan(pesanDasbor, 'pesan-galat', 'Isi jarak pesanan nomor ' + p.id + ' dalam kilometer terlebih dahulu.');
+        return;
+      }
+      tombol.disabled = true;
+      tombol.textContent = 'Menyimpan...';
+      minta('/api/admin/pesanan/' + p.id + '/ongkir', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jarakKm: nilai })
+      })
+        .then(function (data) {
+          var indeks = -1;
+          dataPesanan.forEach(function (lain, i) {
+            if (Number(lain.id) === Number(p.id)) indeks = i;
+          });
+          if (indeks > -1 && data.pesanan) dataPesanan[indeks] = data.pesanan;
+          tampilkan(
+            pesanDasbor,
+            'pesan-sukses',
+            data.pesan || 'Ongkos kirim pesanan nomor ' + p.id + ' berhasil disimpan.'
+          );
+          gambarPesanan();
+        })
+        .catch(function (err) {
+          tampilkan(pesanDasbor, 'pesan-galat', err.message || 'Ongkos kirim gagal disimpan.');
+        })
+        .finally(function () {
+          tombol.disabled = false;
+          tombol.textContent = 'Hitung dan Simpan';
+        });
+    });
+
+    baris.appendChild(input);
+    baris.appendChild(tombol);
+    bungkus.appendChild(baris);
+    bungkus.appendChild(pratinjau);
+    return bungkus;
+  }
+
+  /** Tombol "Konfirmasi via WhatsApp" menuju nomor pembeli dengan rincian biaya. */
+  function tombolKonfirmasiWa(p, subtotal, ongkir, menunggu) {
+    var bungkus = document.createElement('span');
+    bungkus.style.display = 'block';
+    bungkus.style.marginTop = '6px';
+
+    var tombol = document.createElement('button');
+    tombol.type = 'button';
+    tombol.className = 'tombol tombol-cokelat tombol-kecil';
+    tombol.textContent = 'Konfirmasi via WhatsApp';
+    tombol.addEventListener('click', function () {
+      var baris = [
+        'Halo ' + (p.nama || 'Pembeli') + ',',
+        'Konfirmasi pesanan BanaFitBrow nomor ' + p.id + ':',
+        'Produk: ' + p.produk_nama + ' x ' + p.jumlah,
+        'Subtotal: ' + BFB.rupiah(subtotal)
+      ];
+      if (menunggu) {
+        baris.push('Ongkos kirim: akan dikonfirmasi pengelola');
+        baris.push('Total pembayaran: subtotal ditambah ongkos kirim yang dikonfirmasi pengelola');
+      } else {
+        baris.push('Ongkos kirim: ' + BFB.rupiah(ongkir));
+        baris.push('Total pembayaran: ' + BFB.rupiah(subtotal + ongkir));
+      }
+      window.open(BFB.tautanWa(nomorWaIndonesia(p.whatsapp), baris.join('\n')), '_blank', 'noopener');
+    });
+    bungkus.appendChild(tombol);
+    return bungkus;
+  }
+
   /* --- Muat data --------------------------------------------------------- */
   function gambarPesanan() {
     var tbody = document.getElementById('isiPesanan');
@@ -103,8 +252,11 @@
       var subtotal = Number(p.total) || 0;
       var ongkir = Number(p.ongkir) || 0;
       var alamat = p.alamat || '';
+      var lokasiUrl = typeof p.lokasi_url === 'string' ? p.lokasi_url : '';
       var jarak = Number(p.jarak_km) || 0;
       var catatan = p.catatan || '';
+      var statusOngkir = p.status_ongkir || (metode === 'antar' ? (jarak > 0 ? 'terkonfirmasi' : 'menunggu') : 'tidak_perlu');
+      var menunggu = statusOngkir === 'menunggu';
 
       function garis(teks, meredup) {
         var span = document.createElement('span');
@@ -125,11 +277,17 @@
       tr.appendChild(td(p.jumlah));
 
       // Total pembayaran = total produk + ongkos kirim (kolom total tetap subtotal produk).
+      // Onkir yang masih menunggu konfirmasi tidak dihitung sebagai ongkir terkonfirmasi.
       var cellTotal = document.createElement('td');
-      cellTotal.appendChild(document.createTextNode(BFB.rupiah(subtotal + ongkir)));
-      cellTotal.appendChild(
-        garis('Produk ' + BFB.rupiah(subtotal) + ' · Ongkir ' + BFB.rupiah(ongkir), true)
-      );
+      if (menunggu) {
+        cellTotal.appendChild(document.createTextNode(BFB.rupiah(subtotal)));
+        cellTotal.appendChild(garis('Ongkir menunggu konfirmasi', true));
+      } else {
+        cellTotal.appendChild(document.createTextNode(BFB.rupiah(subtotal + ongkir)));
+        cellTotal.appendChild(
+          garis('Produk ' + BFB.rupiah(subtotal) + ' · Ongkir ' + BFB.rupiah(ongkir), true)
+        );
+      }
       tr.appendChild(cellTotal);
 
       var cellStatus = document.createElement('td');
@@ -148,10 +306,30 @@
       cellKeterangan.appendChild(garis('Metode: ' + (metode === 'antar' ? 'Antar' : 'Jemput'), false));
       if (metode === 'antar') {
         cellKeterangan.appendChild(garis('Alamat: ' + (alamat || '-'), true));
-        cellKeterangan.appendChild(garis('Jarak: ' + BfbOngkir.teksJarak(jarak) + ' km', true));
+        if (lokasiUrl && /^https?:\/\//i.test(lokasiUrl)) {
+          var cellLokasi = document.createElement('span');
+          cellLokasi.style.display = 'block';
+          cellLokasi.style.fontSize = '0.85rem';
+          var aLokasi = document.createElement('a');
+          aLokasi.href = lokasiUrl;
+          aLokasi.target = '_blank';
+          aLokasi.rel = 'noopener noreferrer';
+          aLokasi.textContent = 'Buka tautan lokasi';
+          cellLokasi.appendChild(aLokasi);
+          cellKeterangan.appendChild(cellLokasi);
+        }
       }
-      cellKeterangan.appendChild(garis('Ongkir: ' + BFB.rupiah(ongkir), true));
+      if (menunggu) {
+        cellKeterangan.appendChild(garis('Ongkir: menunggu konfirmasi pengelola', true));
+      } else {
+        if (metode === 'antar' && jarak > 0) {
+          cellKeterangan.appendChild(garis('Jarak: ' + BfbOngkir.teksJarak(jarak) + ' km', true));
+        }
+        cellKeterangan.appendChild(garis('Ongkir: ' + BFB.rupiah(ongkir), true));
+      }
       if (catatan) cellKeterangan.appendChild(garis('Catatan: ' + catatan, true));
+      if (menunggu) cellKeterangan.appendChild(kotakHitungOngkir(p));
+      cellKeterangan.appendChild(tombolKonfirmasiWa(p, subtotal, ongkir, menunggu));
       tr.appendChild(cellKeterangan);
 
       tbody.appendChild(tr);
@@ -213,6 +391,8 @@
       document.getElementById('statNilai').textContent = BFB.rupiah(data.totalNilai);
       document.getElementById('statNilaiProduk').textContent = BFB.rupiah(data.totalNilai);
       document.getElementById('statOngkir').textContent = BFB.rupiah(data.totalOngkir || 0);
+      document.getElementById('statOngkirMenunggu').textContent = data.ongkirMenunggu || 0;
+      document.getElementById('statOngkirMenungguRekap').textContent = data.ongkirMenunggu || 0;
       document.getElementById('infoPenyimpanan').textContent = data.penyimpanan;
 
       var tbodyStatus = document.getElementById('isiStatus');

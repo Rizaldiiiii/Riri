@@ -545,6 +545,7 @@ table.data tr.sorotan { background: var(--kuning-3) !important; font-weight: 700
 .status-baru { background: var(--kuning-3); color: #7a5b00; border-color: var(--kuning); }
 .status-diproses { background: #e8f0fe; color: #17458f; border-color: #9db9ee; }
 .status-selesai { background: #e7f5ee; color: #14543a; border-color: #8fcbaf; }
+.status-menunggu { background: #fdecea; color: #7d1b16; border-color: #e8a29d; }
 
 /* --- Tab admin --------------------------------------------------------- */
 .tab-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }

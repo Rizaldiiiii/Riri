@@ -71,7 +71,7 @@
             <input type="radio" id="metodeAntar" name="metode" value="antar" required>
             <span>Antar ke lokasi pembeli</span>
           </label>
-          <span class="bantuan">Jemput berarti Anda mengambil pesanan di kantor kami dengan ongkos kirim Rp0. Antar berarti pesanan diantar ke lokasi Anda dengan ongkos kirim sesuai jarak.</span>
+          <span class="bantuan">Jemput berarti Anda mengambil pesanan di kantor kami dengan ongkos kirim Rp0. Antar berarti pesanan diantar ke lokasi Anda; ongkos kirim ditentukan pengelola berdasarkan jarak dan dikonfirmasi melalui WhatsApp.</span>
         </div>
 
         <div class="bidang" id="bidangJemput" hidden>
@@ -84,10 +84,9 @@
           <textarea id="alamat" name="alamat" minlength="10" maxlength="300" placeholder="Contoh: Jl. Melati No. 10, Kelurahan Sukamaju, Kota Bandung"></textarea>
           <span class="bantuan">Isi alamat lengkap tujuan pengantaran, antara 10 sampai 300 karakter.</span>
 
-          <label for="jarak">Perkiraan Jarak dari Kantor (km) <span aria-hidden="true">*</span></label>
-          <input type="number" id="jarak" name="jarak" inputmode="decimal" step="any" min="0" placeholder="Contoh: 4,5">
-          <span class="bantuan" id="petunjukJarak">Periksa jarak dari kantor ke lokasi Anda melalui Google Maps, lalu isi perkiraan jaraknya dalam kilometer (contoh 4,5).</span>
-          <span class="bantuan bantuan-galat" id="infoJarak"></span>
+          <label for="lokasiUrl">Tautan Lokasi Google Maps (opsional)</label>
+          <input type="url" id="lokasiUrl" name="lokasiUrl" maxlength="500" placeholder="https://maps.app.goo.gl/...">
+          <span class="bantuan">Opsional, maksimal 500 karakter. Tautan harus berawalan http:// atau https://. Jarak dan ongkos kirim akan dihitung serta dikonfirmasi oleh pengelola.</span>
         </div>
 
         <div class="bidang">
@@ -99,7 +98,7 @@
         <div class="persetujuan">
           <input type="checkbox" id="persetujuan" name="persetujuan" required>
           <label for="persetujuan">
-            Saya setuju bahwa data pelanggan yang saya isi, termasuk alamat pengiriman,
+            Saya setuju bahwa data pelanggan yang saya isi, termasuk alamat dan tautan lokasi,
             digunakan untuk keperluan pemrosesan pesanan, konfirmasi pemesanan,
             pengiriman atau penyerahan barang, dan layanan konsumen BanaFitBrow.
           </label>
@@ -110,7 +109,7 @@
           <div class="baris-ringkasan"><span>Subtotal produk</span><strong id="perkiraanSubtotal">Rp0</strong></div>
           <div class="baris-ringkasan"><span>Ongkos kirim</span><strong id="perkiraanOngkir">Rp0</strong></div>
           <div class="baris-ringkasan baris-total"><span>Total pembayaran</span><strong id="perkiraanTotal">Rp0</strong></div>
-          <span class="bantuan">Ongkos kirim merupakan perkiraan berdasarkan jarak dan akan dikonfirmasi oleh pengelola.</span>
+          <span class="bantuan">Untuk metode antar, ongkos kirim ditentukan pengelola berdasarkan jarak lalu dikonfirmasi melalui WhatsApp. Total pembayaran adalah subtotal produk ditambah ongkos kirim yang dikonfirmasi pengelola.</span>
         </div>
 
         <div class="hero-aksi">
@@ -166,7 +165,6 @@
     </div>
   </footer>
 
-  <script src="/js/ongkir.js"></script>
   <script src="/js/main.js"></script>
   <script src="/js/pesanan.js"></script>
 </body>

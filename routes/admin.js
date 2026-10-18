@@ -3,6 +3,8 @@
 const express = require('express');
 const storage = require('../data/storage');
 const env = require('../config/env');
+const produkData = require('../data/produk');
+const { hitungOngkir } = require('../public/js/ongkir');
 const {
   NAMA_KUKI,
   DURASI_SESI_MS,
@@ -86,6 +88,46 @@ router.put('/pesanan/:id/status', wajibAdmin, (req, res) => {
   }
 });
 
+/**
+ * PUT /api/admin/pesanan/:id/ongkir — menghitung dan menyimpan ongkos kirim.
+ * Isi permintaan: { jarakKm }. Jarak diukur admin melalui Google Maps,
+ * ongkir dihitung di server dengan tabel tarif konfigurasi, lalu status ongkir
+ * menjadi "terkonfirmasi". Hanya berlaku untuk pesanan bermetode "antar".
+ */
+router.put('/pesanan/:id/ongkir', wajibAdmin, (req, res) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Nomor pesanan tidak valid.' });
+
+  const jarak =
+    req.body && req.body.jarakKm !== undefined && req.body.jarakKm !== null && req.body.jarakKm !== ''
+      ? Number(req.body.jarakKm)
+      : Number.NaN;
+
+  try {
+    const pesanan = storage.daftarPesanan().find((p) => Number(p.id) === id);
+    if (!pesanan) return res.status(404).json({ error: 'Pesanan tidak ditemukan.' });
+    if ((pesanan.metode || 'jemput') !== 'antar') {
+      return res.status(400).json({ error: 'Ongkos kirim hanya dapat diisi untuk pesanan dengan metode antar.' });
+    }
+
+    const hitung = hitungOngkir(produkData.pengiriman, jarak);
+    if (!hitung.ok) return res.status(400).json({ error: hitung.error });
+
+    const terbaru = storage.ubahOngkirPesanan(id, jarak, hitung.ongkir);
+    if (!terbaru) return res.status(404).json({ error: 'Pesanan tidak ditemukan.' });
+
+    res.json({
+      ok: true,
+      pesan: 'Ongkos kirim pesanan nomor ' + id + ' berhasil disimpan.',
+      pesanan: terbaru,
+      totalPembayaran: (Number(terbaru.total) || 0) + hitung.ongkir
+    });
+  } catch (err) {
+    console.error('[admin] Gagal menyimpan ongkir:', err);
+    res.status(500).json({ error: 'Ongkos kirim gagal disimpan.' });
+  }
+});
+
 /** GET /api/admin/pesanan.csv — ekspor data pesanan ke CSV. */
 router.get('/pesanan.csv', wajibAdmin, (req, res) => {
   try {
@@ -102,15 +144,25 @@ router.get('/pesanan.csv', wajibAdmin, (req, res) => {
       'total',
       'metode',
       'alamat',
+      'lokasi_url',
       'jarak_km',
       'ongkir',
+      'status_ongkir',
       'catatan',
       'persetujuan',
       'status'
     ];
     const isi = keCsv(
       kolom,
-      daftar.map((pesanan) => Object.assign({}, pesanan, bawaanPesanan(pesanan)))
+      daftar.map((pesanan) => {
+        const baris = Object.assign({}, pesanan, bawaanPesanan(pesanan));
+        // Onkir berstatus menunggu bukan ongkir terkonfirmasi: jarak dan ongkir dikosongkan.
+        if (baris.status_ongkir === 'menunggu') {
+          baris.jarak_km = '';
+          baris.ongkir = '';
+        }
+        return baris;
+      })
     );
     const namaBerkas = 'pesanan-banafitbrow-' + new Date().toISOString().slice(0, 10) + '.csv';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -196,11 +248,22 @@ router.get('/rekap', wajibAdmin, (req, res) => {
       if (perStatus[pesanan.status] !== undefined) perStatus[pesanan.status] += 1;
     }
 
+    // Total ongkir hanya menghitung pesanan dengan status ongkir "terkonfirmasi";
+    // pesanan berstatus "menunggu" dihitung terpisah sebagai jumlah.
+    let ongkirTerkonfirmasi = 0;
+    let ongkirMenunggu = 0;
+    for (const pesanan of daftar) {
+      const bawaan = bawaanPesanan(pesanan);
+      if (bawaan.status_ongkir === 'terkonfirmasi') ongkirTerkonfirmasi += bawaan.ongkir;
+      if (bawaan.status_ongkir === 'menunggu') ongkirMenunggu += 1;
+    }
+
     res.json({
       totalPesanan: daftar.length,
       totalItem: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.jumlah) || 0), 0),
       totalNilai: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.total) || 0), 0),
-      totalOngkir: daftar.reduce((jumlahkan, p) => jumlahkan + (Number(p.ongkir) || 0), 0),
+      totalOngkir: ongkirTerkonfirmasi,
+      ongkirMenunggu,
       perStatus,
       perProduk: Array.from(perProduk.values()),
       penyimpanan: storage.nama + ' — ' + storage.keterangan

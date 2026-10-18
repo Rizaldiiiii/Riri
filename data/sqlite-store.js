@@ -25,10 +25,12 @@ CREATE TABLE IF NOT EXISTS pesanan (
   total       INTEGER NOT NULL,
   catatan     TEXT    NOT NULL DEFAULT '',
   persetujuan INTEGER NOT NULL DEFAULT 0,
-  metode      TEXT    NOT NULL DEFAULT 'jemput',
-  alamat      TEXT    NOT NULL DEFAULT '',
-  jarak_km    REAL    NOT NULL DEFAULT 0,
-  ongkir      INTEGER NOT NULL DEFAULT 0,
+  metode         TEXT    NOT NULL DEFAULT 'jemput',
+  alamat         TEXT    NOT NULL DEFAULT '',
+  lokasi_url     TEXT    NOT NULL DEFAULT '',
+  jarak_km       REAL    NOT NULL DEFAULT 0,
+  ongkir         INTEGER NOT NULL DEFAULT 0,
+  status_ongkir  TEXT    NOT NULL DEFAULT '',
   status      TEXT    NOT NULL DEFAULT 'baru',
   diperbarui  TEXT
 );
@@ -45,9 +47,25 @@ CREATE TABLE IF NOT EXISTS feedback (
 const MIGRASI_PESANAN = [
   ["metode", "TEXT NOT NULL DEFAULT 'jemput'"],
   ["alamat", "TEXT NOT NULL DEFAULT ''"],
+  ['lokasi_url', "TEXT NOT NULL DEFAULT ''"],
   ['jarak_km', 'REAL NOT NULL DEFAULT 0'],
-  ['ongkir', 'INTEGER NOT NULL DEFAULT 0']
+  ['ongkir', 'INTEGER NOT NULL DEFAULT 0'],
+  ['status_ongkir', "TEXT NOT NULL DEFAULT ''"]
 ];
+
+/**
+ * Melengkapi status ongkos kirim pesanan lama berdasarkan isinya:
+ * jemput menjadi "tidak_perlu"; antar dengan jarak terisi menjadi "terkonfirmasi";
+ * antar tanpa jarak menjadi "menunggu". Baris yang sudah memiliki status dilewati.
+ */
+const MIGRASI_STATUS_ONGKIR = `
+UPDATE pesanan
+   SET status_ongkir = CASE
+     WHEN metode = 'antar' AND jarak_km > 0 THEN 'terkonfirmasi'
+     WHEN metode = 'antar' THEN 'menunggu'
+     ELSE 'tidak_perlu'
+   END
+ WHERE status_ongkir IS NULL OR status_ongkir = ''`;
 
 class SqliteStore {
   constructor(db, nama, keterangan) {
@@ -59,6 +77,11 @@ class SqliteStore {
   siap() {
     this.db.exec(SKEMA);
     this.migrasiPesanan();
+    try {
+      this.jalankan(MIGRASI_STATUS_ONGKIR);
+    } catch (err) {
+      console.warn('[penyimpanan] Status ongkir pesanan lama tidak dapat dilengkapi:', err.message);
+    }
   }
 
   /**
@@ -116,8 +139,8 @@ class SqliteStore {
     const hasil = this.jalankan(
       `INSERT INTO pesanan
          (waktu, nama, whatsapp, produk_id, produk_nama, harga, jumlah, total,
-          metode, alamat, jarak_km, ongkir, catatan, persetujuan, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'baru')`,
+          metode, alamat, lokasi_url, jarak_km, ongkir, status_ongkir, catatan, persetujuan, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'baru')`,
       [
         waktu,
         isi.nama,
@@ -129,8 +152,10 @@ class SqliteStore {
         isi.total,
         isi.metode || 'jemput',
         isi.alamat || '',
+        isi.lokasi_url || '',
         Number(isi.jarak_km) || 0,
         Number(isi.ongkir) || 0,
+        isi.status_ongkir || '',
         isi.catatan,
         isi.persetujuan ? 1 : 0
       ]
@@ -142,6 +167,20 @@ class SqliteStore {
 
   daftarPesanan() {
     return this.semua('SELECT * FROM pesanan ORDER BY id DESC');
+  }
+
+  /**
+   * Menyimpan hasil pengukuran jarak admin: jarak_km, ongkir,
+   * dan status ongkir "terkonfirmasi".
+   */
+  ubahOngkirPesanan(id, jarakKm, ongkir) {
+    const ada = this.satu('SELECT id FROM pesanan WHERE id = ?', [Number(id)]);
+    if (!ada) return null;
+    this.jalankan(
+      'UPDATE pesanan SET jarak_km = ?, ongkir = ?, status_ongkir = ?, diperbarui = ? WHERE id = ?',
+      [Number(jarakKm), Number(ongkir), 'terkonfirmasi', new Date().toISOString(), Number(id)]
+    );
+    return this.satu('SELECT * FROM pesanan WHERE id = ?', [Number(id)]);
   }
 
   ubahStatusPesanan(id, status) {
