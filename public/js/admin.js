@@ -474,11 +474,14 @@
       });
   });
 
-  document.getElementById('tombolKeluar').addEventListener('click', function () {
-    minta('/api/admin/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
-      .catch(function () { /* abaikan */ })
-      .finally(function () { tampilkanMasuk(); });
-  });
+  var tombolKeluar = document.getElementById('tombolKeluar');
+  if (tombolKeluar) {
+    tombolKeluar.addEventListener('click', function () {
+      minta('/api/admin/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+        .catch(function () { /* abaikan */ })
+        .finally(function () { tampilkanMasuk(); });
+    });
+  }
 
   document.getElementById('tombolMuat').addEventListener('click', function () {
     tampilkan(pesanDasbor, 'pesan-info', 'Memuat ulang data...');
